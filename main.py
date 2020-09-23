@@ -46,28 +46,32 @@ device.setColorFrameListener(listener)
 device.start()
 
 # main loop
-while True:
-    # get frame
-    frames = listener.waitForNewFrame()
+close, pause = False, False
+while not close:
+    if not pause:
+        # get frame
+        frames = listener.waitForNewFrame()
 
-    # set input color image
-    width, height = int(1920 * IMAGE_SCALE), int(1080 * IMAGE_SCALE)
-    input = cv2.resize(frames["color"].asarray(), (width, height))[:, :, :-1]
+        # set input color image
+        width, height = int(1920 * IMAGE_SCALE), int(1080 * IMAGE_SCALE)
+        input = cv2.resize(frames["color"].asarray(), (width, height))[:, :, :-1]
 
-    # run Mask-RCNN
-    output = mrcnn.run(input)
+        # run Mask-RCNN
+        output = mrcnn.run(input)
 
-    # visualize
-    cv2.imshow("Input", input)
-    cv2.imshow("Output", output)
+        # visualize
+        cv2.imshow("Input", input)
+        cv2.imshow("Output", output)
 
-    # release frame
-    listener.release(frames)
+        # release frame
+        listener.release(frames)
 
     # update
     key = cv2.waitKey(delay=1)
+    if key == ord('s') or key == ord('p'):
+        pause = not pause # pause when 's' or 'p' key was pressed
     if key == ord('q') or key == 27:
-        break # exit loop when 'q' or 'ESC' key was pressed
+        close = True # exit loop when 'q' or 'ESC' key was pressed
 
 # stop and close device
 device.stop()
